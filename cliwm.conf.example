@@ -1,0 +1,82 @@
+# Example CLIWM config. This file is written to ~/.config/cliwm.conf
+# automatically the first time you run CLIWM if that path doesn't exist yet.
+#
+# Format (Hyprland-flavored):
+#   leader      = <mods>, <key>          chord that starts a "leader, digit" sequence
+#   resize_exit = <mods>, <key>          the only chord that exits resize mode (default: esc)
+#   accent      = #<hex>                 overrides the focused-pane border color
+#   statusbar   = <shell command>        see "Status bar" below
+#   layout      = one-side|grid|divide   see "Layouts" below (default: one-side)
+#   bind        = <mods>, <key>, <action>[, <arg>]
+#
+# mods: none, or ctrl/alt/shift combined with '+' (e.g. ctrl+shift)
+# key: a single character, up/down/left/right, enter, tab, esc, space,
+#      backspace, or f1-f12
+# actions: new_terminal | move_window (arg: up/down/left/right)
+#        | kill_window | quit | toggle_resize_mode
+#        | switch_workspace (arg: 1-9)
+#
+# `leader` must carry a modifier -- a bare, unmodified key would swallow
+# every normal keystroke typed in a shell that happens to match it. The
+# default uses Alt rather than Ctrl for the digit half specifically because
+# most terminals don't send a distinguishable Ctrl+<digit> for every digit
+# (Ctrl+1/2/3/8/9 collide with other keys or arrive with no modifier bit on
+# many terminals) -- Alt+<digit> works reliably for all of 1-9.
+#
+# Two behaviors are built in and not remappable here:
+#   - Alt+<digit 1-9>                   focuses window N in the current workspace
+#   - leader, then digit 1-9 held with the SAME modifier as leader, switches
+#     to workspace N (default: hold Alt, press w, then -- still holding Alt
+#     -- press a digit)
+#
+# To bind a *specific* workspace to its own single chord instead of (or in
+# addition to) the leader sequence above, use switch_workspace directly:
+#   bind = alt, f1, switch_workspace, 1
+#   bind = alt, f2, switch_workspace, 2
+#
+# A workspace holds at most 9 windows, matching the 1-9 digit range used to
+# focus them -- new_terminal is a no-op past that.
+#
+# Layouts:
+#   one-side  each new window splits whichever pane is currently focused,
+#             always into rows (top/bottom) -- so opening several terminals
+#             without changing focus builds a top-to-bottom stack, same as
+#             focusing a specific one and splitting just that pane.
+#   grid      all windows recomputed fresh into a roughly-square grid every
+#             time, independent of focus/creation history.
+#   divide    like one-side, but each split's direction (rows or columns)
+#             is chosen from the aspect ratio of the pane being split, so
+#             the result tends to look grid-like without being a flat grid.
+# Only one-side and divide support resize mode's up/down (grid's cells are
+# always uniform); all three support left/right and moving windows.
+
+leader = alt, w
+# resize_exit = esc
+
+# accent = #61afef
+
+# layout = one-side
+
+# Status bar: CLIWM doesn't ship one, but this is the hook to build one.
+# Point it at a long-lived program -- not a pane, not a terminal, launched
+# once and left running independently of any workspace for as long as
+# CLIWM is open (and killed when CLIWM exits) -- and CLIWM shows whatever
+# line it prints in the bottom-left corner (the version label stays
+# bottom-right), updating whenever a new line arrives. The program decides
+# its own update cadence (an i3status/waybar-style loop printing a fresh
+# line every second, or only when something actually changes); CLIWM never
+# re-invokes or polls it.
+# statusbar = ~/.config/cliwm-statusbar.sh
+
+bind = alt, t, new_terminal
+bind = alt, up, move_window, up
+bind = alt, down, move_window, down
+bind = alt, left, move_window, left
+bind = alt, right, move_window, right
+bind = alt, q, quit
+bind = alt, x, kill_window
+
+# Resize mode: press once to enter, then arrow keys grow/shrink the
+# focused window (left/right adjust the main/stack split, up/down adjust
+# its height against a stack neighbor); Esc (or the same chord again) exits.
+bind = alt, r, toggle_resize_mode
